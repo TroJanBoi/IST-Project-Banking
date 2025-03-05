@@ -1,0 +1,56 @@
+****BANGYAI
+///multi sw 1
+en
+conf t
+
+vlan 10
+name
+vlan 20
+name
+interface Vlan10
+ ip address 192.168.10.1 255.255.255.0
+ no shutdown
+
+interface Vlan20
+ ip address 192.168.20.1 255.255.255.0
+ no shutdown
+
+vtp mode server
+vtp domain MyBankNetwork  
+vtp version 2
+vtp password mysecurepass 
+ 
+ip dhcp excluded-address 192.168.10.1 192.168.10.10
+ip dhcp pool VLAN10_POOL
+ network 192.168.10.0 255.255.255.0
+ default-router 192.168.10.1
+ dns-server 8.8.8.8
+
+ip dhcp excluded-address 192.168.20.1 192.168.20.10
+ip dhcp pool VLAN20_POOL
+ network 192.168.20.0 255.255.255.0
+ default-router 192.168.20.1
+ dns-server 8.8.8.8
+spanning-tree mode rapid-pvst
+interface range Gi1/0/1-24	
+switchport mode trunk
+service dhcp
+end
+write memory
+
+///acc sw
+en
+conf t
+
+interface range GigabitEthernet 0/1-2
+switchport mode trunk
+
+vtp mode client
+vtp domain MyBankNetwork
+vtp password mysecurepass
+
+interface range FastEthernet 0/1-24
+switchport mode access
+switchport access vlan 20
+
+spanning-tree mode rapid-pvst 

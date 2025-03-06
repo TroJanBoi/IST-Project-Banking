@@ -4,17 +4,31 @@ en
 conf t
 int fa0/0
 no shut
-ip add 172.16.1.1 255.255.255.0
+ip add 192.168.13.1 255.255.255.248
 ex
-int fa0/1
-no shut
-ip add 172.16.2.1 255.255.255.0
+int fa0/0.10
+en do 10
+ip ad 192.168.110.1 255.255.255.240
+no sh
+int fa0/0.20
+en do 20
+ip ad 192.168.120.1 255.255.255.240
+no sh
 
+
+int fa0/1.10
+en do 10
+ip ad 192.168.110.2 255.255.255.240
+no sh
+int fa0/1.20
+en do 20
+ip ad 192.168.120.2 255.255.255.240
+no sh
 ex
 router rip
 v 2
-network 172.16.1.0
-network 172.16.2.0
+network 192.168.13.0
+network 192.168.14.0
 end
 w
 
@@ -36,22 +50,22 @@ login
 exit
 
 vlan 10
-name it
+name ACCOUT
 vlan 20
-name seal
+name IT
 
 ip routing
 
 interface vlan10
-ip add 172.16.10.2 255.255.255.0
-st 10 ip 172.16.10.254
+ip add 192.168.110.2 255.255.255.240
+st 10 ip 192.168.110.14
 st 10 pri 100
 st 10 pree
 no shutdown
 
 int vlan20
-ip add 172.16.20.2 255.255.255.0
-st 20 ip 172.16.20.254
+ip add 192.168.120.2 255.255.255.240
+st 20 ip 192.168.120.14
 st 20 pri 100
 st 20 pree
 no shut
@@ -62,29 +76,34 @@ vtp domain MyBankNetwork
 vtp version 2
 vtp password pass 
  
-ip dhcp excluded-address 172.16.10.1 172.16.10.11
-ip dhcp pool VLAN10_POOL
-network 172.16.10.0 255.255.255.0
-default-router 172.16.10.254
+ip dhcp excluded-address 192.168.110.14
+ip dhcp excluded-address 192.168.110.1 192.168.110.3
+ip dhcp pool vlan10
+network 192.168.110.0 255.255.255.240
+default-router 192.168.110.1
 dns-server 8.8.8.8
 
-ip dhcp excluded-address 172.16.20.1 172.16.20.11
-ip dhcp pool VLAN20_POOL
- network 172.16.20.0 255.255.255.0
- default-router 172.16.20.254
- dns-server 8.8.8.8
+
+ip dhcp excluded-address 192.168.120.14 
+ip dhcp excluded-address 192.168.120.1 192.168.120.3
+ip dhcp pool vlan20
+network 192.168.120.0 255.255.255.240
+default-router 192.168.120.1
+dns-server 8.8.8.8
+
 
 interface range Gi1/0/1-24	
 switchport mode trunk
+sw t a v 10,20
 int gi1/0/24
 no sh
 no sw
-ip add 172.16.1.2 255.255.255.0
+ip add 192.168.13.2 255.255.255.248
 
 
 router rip
 v 2
-network 172.16.1.0
+network 192.168.13.0
 no auto-summary
 
 service dhcp
@@ -109,27 +128,27 @@ login
 exit
 
 vlan 10
-name it
+name ACCOUT
 vlan 20
-name seal
+name IT
 
 ip routing
 
-int vlan10
-ip add 172.16.10.3 255.255.255.0
-st 10 ip 172.16.10.254
+interface vlan10
+ip add 192.168.110.3 255.255.255.240
+st 10 ip 192.168.110.14
 st 10 pri 90
 st 10 pree
-no shut
-ex
+no shutdown
 
 int vlan20
-ip add 172.16.20.3 255.255.255.0
-st 20 ip 172.16.20.254
+ip add 192.168.120.3 255.255.255.240
+st 20 ip 192.168.120.14
 st 20 pri 90
 st 20 pree
 no shut
 ex
+
 
 vtp mode server
 vtp domain MyBankNetwork  
@@ -137,17 +156,22 @@ vtp version 2
 vtp password pass 
  
 
-ip dhcp excluded-address 172.16.10.1 172.16.10.11
-ip dhcp pool VLAN10_POOL
-network 172.16.10.0 255.255.255.0
-default-router 172.16.10.254
+ip dhcp excluded-address 192.168.110.14
+ip dhcp excluded-address 192.168.110.1 192.168.110.3
+
+ip dhcp pool vlan10
+network 192.168.110.0 255.255.255.240
+default-router 192.168.110.14
 dns-server 8.8.8.8
 
-ip dhcp excluded-address 172.16.20.1 172.16.20.11
-ip dhcp pool VLAN20_POOL
- network 172.16.20.0 255.255.255.0
- default-router 172.16.20.254
- dns-server 8.8.8.8
+
+ip dhcp excluded-address 192.168.120.14 
+ip dhcp excluded-address 192.168.120.1 192.168.120.3
+
+ip dhcp pool vlan20
+network 192.168.120.0 255.255.255.240
+default-router 192.168.120.14
+dns-server 8.8.8.8
 
 
 interface range Gi1/0/1-24	
@@ -155,11 +179,11 @@ switchport mode trunk
 int gi1/0/24
 no sh
 no sw
-ip add 172.16.2.2 255.255.255.0
+ip add 192.168.14.2 255.255.255.248
 
 router rip
 v 2
-network 172.16.2.0
+network 192.168.14.0
 no auto-summary
 
 service dhcp
@@ -181,9 +205,6 @@ vtp password pass
 interface range FastEthernet 0/1-24
 switchport mode access
 switchport access vlan 10
-
-
-
 end
 w
 
@@ -202,8 +223,5 @@ vtp password pass
 interface range FastEthernet 0/1-24
 switchport mode access
 switchport access vlan 20
-
-
- 
 end
 w

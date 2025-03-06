@@ -1,0 +1,13 @@
+enable
+configure terminal
+hostname Bangkok-Router
+
+interface Serial0/1
+ip address 10.1.1.6 255.255.255.252
+no sh
+exit
+
+router ospf 10
+network 10.1.1.0 0.0.0.3 area 0
+network 10.1.1.8 0.0.0.3 area 0
+network 10.1.1.4 0.0.0.3 area 0

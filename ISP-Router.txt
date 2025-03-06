@@ -1,0 +1,23 @@
+enable
+configure terminal
+hostname ISP-Router
+interface Serial0/0
+
+ip address 10.1.1.2 255.255.255.252
+no sh
+exit
+
+interface Serial0/1
+ip address 10.1.1.5 255.255.255.252
+no sh
+exit
+
+interface Serial0/2
+ip address 10.1.1.9 255.255.255.252
+no sh
+exit
+
+router ospf 10
+network 10.1.1.0 0.0.0.3 area 0
+network 10.1.1.4 0.0.0.3 area 0
+network 10.1.1.8 0.0.0.3 area 0

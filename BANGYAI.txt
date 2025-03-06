@@ -1,56 +1,209 @@
 ****BANGYAI
+///router
+en
+conf t
+int fa0/0
+no shut
+ip add 172.16.1.1 255.255.255.0
+ex
+int fa0/1
+no shut
+ip add 172.16.2.1 255.255.255.0
+
+ex
+router rip
+v 2
+network 172.16.1.0
+network 172.16.2.0
+end
+w
+
 ///multi sw 1
 en
 conf t
+hostname ML-SW-1
+
+enable secret cisco
+line console 0
+password pass
+login
+exit
+
+line vty 0
+password pass
+transport input telnet
+login
+exit
 
 vlan 10
-name
+name it
 vlan 20
-name
-interface Vlan10
- ip address 192.168.10.1 255.255.255.0
- no shutdown
+name seal
 
-interface Vlan20
- ip address 192.168.20.1 255.255.255.0
- no shutdown
+ip routing
+
+interface vlan10
+ip add 172.16.10.2 255.255.255.0
+st 10 ip 172.16.10.254
+st 10 pri 100
+st 10 pree
+no shutdown
+
+int vlan20
+ip add 172.16.20.2 255.255.255.0
+st 20 ip 172.16.20.254
+st 20 pri 100
+st 20 pree
+no shut
+ex
 
 vtp mode server
 vtp domain MyBankNetwork  
 vtp version 2
-vtp password mysecurepass 
+vtp password pass 
  
-ip dhcp excluded-address 192.168.10.1 192.168.10.10
+ip dhcp excluded-address 172.16.10.1 172.16.10.11
 ip dhcp pool VLAN10_POOL
- network 192.168.10.0 255.255.255.0
- default-router 192.168.10.1
+network 172.16.10.0 255.255.255.0
+default-router 172.16.10.254
+dns-server 8.8.8.8
+
+ip dhcp excluded-address 172.16.20.1 172.16.20.11
+ip dhcp pool VLAN20_POOL
+ network 172.16.20.0 255.255.255.0
+ default-router 172.16.20.254
  dns-server 8.8.8.8
 
-ip dhcp excluded-address 192.168.20.1 192.168.20.10
-ip dhcp pool VLAN20_POOL
- network 192.168.20.0 255.255.255.0
- default-router 192.168.20.1
- dns-server 8.8.8.8
-spanning-tree mode rapid-pvst
 interface range Gi1/0/1-24	
 switchport mode trunk
+int gi1/0/24
+no sh
+no sw
+ip add 172.16.1.2 255.255.255.0
+
+
+router rip
+v 2
+network 172.16.1.0
+no auto-summary
+
 service dhcp
 end
 write memory
 
-///acc sw
+///multi sw 2
 en
 conf t
+hostname ML-SW-2
+
+enable secret cisco
+line console 0
+password pass
+login
+exit
+
+line vty 0
+password pass
+transport input telnet
+login
+exit
+
+vlan 10
+name it
+vlan 20
+name seal
+
+ip routing
+
+int vlan10
+ip add 172.16.10.3 255.255.255.0
+st 10 ip 172.16.10.254
+st 10 pri 90
+st 10 pree
+no shut
+ex
+
+int vlan20
+ip add 172.16.20.3 255.255.255.0
+st 20 ip 172.16.20.254
+st 20 pri 90
+st 20 pree
+no shut
+ex
+
+vtp mode server
+vtp domain MyBankNetwork  
+vtp version 2
+vtp password pass 
+ 
+
+ip dhcp excluded-address 172.16.10.1 172.16.10.11
+ip dhcp pool VLAN10_POOL
+network 172.16.10.0 255.255.255.0
+default-router 172.16.10.254
+dns-server 8.8.8.8
+
+ip dhcp excluded-address 172.16.20.1 172.16.20.11
+ip dhcp pool VLAN20_POOL
+ network 172.16.20.0 255.255.255.0
+ default-router 172.16.20.254
+ dns-server 8.8.8.8
+
+
+interface range Gi1/0/1-24	
+switchport mode trunk
+int gi1/0/24
+no sh
+no sw
+ip add 172.16.2.2 255.255.255.0
+
+router rip
+v 2
+network 172.16.2.0
+no auto-summary
+
+service dhcp
+end
+write memory
+
+///acc sw 1
+en
+conf t
+hostname SW-1
 
 interface range GigabitEthernet 0/1-2
 switchport mode trunk
 
 vtp mode client
 vtp domain MyBankNetwork
-vtp password mysecurepass
+vtp password pass
+
+interface range FastEthernet 0/1-24
+switchport mode access
+switchport access vlan 10
+
+
+
+end
+w
+
+///acc sw 2
+en
+conf t
+hostname SW-2
+
+interface range GigabitEthernet 0/1-2
+switchport mode trunk
+
+vtp mode client
+vtp domain MyBankNetwork
+vtp password pass
 
 interface range FastEthernet 0/1-24
 switchport mode access
 switchport access vlan 20
 
-spanning-tree mode rapid-pvst 
+
+ 
+end
+w

@@ -17,7 +17,19 @@ ip address 10.1.1.9 255.255.255.252
 no sh
 exit
 
+
+---- ospf ----
 router ospf 10
 network 10.1.1.0 0.0.0.3 area 0
 network 10.1.1.4 0.0.0.3 area 0
 network 10.1.1.8 0.0.0.3 area 0
+
+---- bgp ----
+
+router bgp 65000
+neighbor 10.1.1.6 remote-as 65001
+neighbor 10.1.1.10 remote-as 65002
+neighbor 10.1.1.1 remote-as 65003
+exit
+
+

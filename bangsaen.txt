@@ -1,0 +1,340 @@
+****BANGSAEN
+///router
+en
+conf t
+int fa0/0
+no shut
+ip add 192.168.25.1 255.255.255.248
+ex
+int fa0/1
+no shut
+ip add 192.168.26.1 255.255.255.248
+ex
+int s0/3
+no shut
+ip add 172.16.3.5 255.255.255.252
+ex
+int s0/2
+no shut
+ip add 172.16.3.1 255.255.255.252
+ex
+
+router ospf 1
+network 192.168.25.0 0.0.0.7 area 0
+network 192.168.26.0 0.0.0.7 area 0
+network 172.16.3.4 0.0.0.3 area 0
+network 172.16.3.0 0.0.0.3 area 0
+end
+w
+
+///multi sw 1
+en
+conf t
+hostname ML-SW-1
+
+enable secret cisco
+line console 0
+password pass
+login
+exit
+
+line vty 0
+password pass
+transport input telnet
+login
+exit
+
+vlan 10
+name it
+vlan 20
+name seal
+vlan 30
+name ma
+vlan 40
+name lo
+vlan 50
+name lo
+
+ip routing
+
+interface vlan10
+ip add 192.168.110.2 255.255.255.240
+st 10 ip 192.168.110.1
+st 10 pri 100
+st 10 pree
+no shutdown
+
+int vlan20
+ip add 192.168.120.2 255.255.255.240
+st 20 ip 192.168.120.1
+st 20 pri 100
+st 20 pree
+no shut
+ex
+
+interface vlan30
+ip add 192.168.130.2 255.255.255.240
+st 30 ip 192.168.130.1
+st 30 pri 100
+st 30 pree
+no shutdown
+
+int vlan40
+ip add 192.168.140.2 255.255.255.240
+st 40 ip 192.168.140.1
+st 40 pri 100
+st 40 pree
+no shut
+ex
+
+interface vlan50
+ip add 192.168.150.2 255.255.255.240
+st 50 ip 192.168.150.1
+st 50 pri 100
+st 50 pree
+no shutdown
+
+vtp mode server
+vtp domain MyBankNetwork  
+vtp version 2
+vtp password pass 
+ 
+ip dhcp excluded-address 192.168.110.1 192.168.110.3
+ip dhcp pool VLAN10_POOL
+network 192.168.110.0 255.255.255.240
+default-router 192.168.110.1
+dns-server 8.8.8.8
+
+ip dhcp excluded-address 192.168.120.1 192.168.120.3
+ip dhcp pool VLAN20_POOL
+network 192.168.120.0 255.255.255.240
+default-router 192.168.120.1
+dns-server 8.8.8.8
+
+ip dhcp excluded-address 192.168.130.1 192.168.130.3
+ip dhcp pool VLAN30_POOL
+network 192.168.130.0 255.255.255.240
+default-router 192.168.130.1
+dns-server 8.8.8.8
+
+ip dhcp excluded-address 192.168.140.1 192.168.140.3
+ip dhcp pool VLAN40_POOL
+network 192.168.140.0 255.255.255.240
+default-router 192.168.140.1
+dns-server 8.8.8.8
+
+ip dhcp excluded-address 192.168.150.1 192.168.150.3
+ip dhcp pool VLAN50_POOL
+network 192.168.150.0 255.255.255.240
+default-router 192.168.150.1
+dns-server 8.8.8.8
+
+interface range Gi1/0/1-3	
+switchport mode trunk
+channel-group 1 mode active
+no sh
+interface range Gi1/0/4-24	
+switchport mode trunk
+interface Port-channel 1
+sw m t
+no shut
+int gi1/0/24
+no sh
+no sw
+ip add 192.168.25.2 255.255.255.248
+
+
+router ospf 1
+network 192.168.25.0 0.0.0.7 area 0
+network 192.168.110.0 0.0.0.15 area 0
+network 192.168.120.0 0.0.0.15 area 0
+network 192.168.130.0 0.0.0.15 area 0
+network 192.168.140.0 0.0.0.15 area 0
+network 192.168.150.0 0.0.0.15 area 0
+
+service dhcp
+end
+conf t
+spanning-tree vlan 10 root primary
+spanning-tree vlan 20 root primary
+spanning-tree vlan 30 root primary
+spanning-tree vlan 40 root primary
+spanning-tree vlan 50 root primary
+end
+write memory
+
+///multi sw 2
+en
+conf t
+hostname ML-SW-2
+
+enable secret cisco
+line console 0
+password pass
+login
+exit
+
+line vty 0
+password pass
+transport input telnet
+login
+exit
+
+vlan 10
+name it
+vlan 20
+name seal
+vlan 30
+name ma
+vlan 40
+name lo
+vlan 50
+name atm
+
+ip routing
+
+int vlan10
+ip add 192.168.110.3 255.255.255.240
+st 10 ip 192.168.110.1
+st 10 pri 90
+no shut
+ex
+
+int vlan20
+ip add 192.168.120.3 255.255.255.240
+st 20 ip 192.168.120.1
+st 20 pri 90
+no shut
+ex
+
+int vlan30
+ip add 192.168.130.3 255.255.255.240
+st 30 ip 192.168.130.1
+st 30 pri 90
+no shut
+ex
+
+int vlan40
+ip add 192.168.140.3 255.255.255.240
+st 40 ip 192.168.140.1
+st 40 pri 90
+no shut
+ex
+
+int vlan50
+ip add 192.168.150.3 255.255.255.240
+st 10 ip 192.168.150.1
+st 10 pri 90
+no shut
+ex
+
+vtp mode server
+vtp domain MyBankNetwork  
+vtp version 2
+vtp password pass 
+ 
+
+ip dhcp excluded-address 192.168.110.1 192.168.110.3
+ip dhcp pool VLAN10_POOL
+network 192.168.110.0 255.255.255.240
+default-router 192.168.110.1
+dns-server 8.8.8.8
+
+ip dhcp excluded-address 192.168.120.1 192.168.120.3
+ip dhcp pool VLAN20_POOL
+network 192.168.120.0 255.255.255.240
+default-router 192.168.120.1
+dns-server 8.8.8.8
+
+ip dhcp excluded-address 192.168.130.1 192.168.130.3
+ip dhcp pool VLAN30_POOL
+network 192.168.130.0 255.255.255.240
+default-router 192.168.130.1
+dns-server 8.8.8.8
+
+ip dhcp excluded-address 192.168.140.1 192.168.140.3
+ip dhcp pool VLAN40_POOL
+network 192.168.140.0 255.255.255.240
+default-router 192.168.140.1
+dns-server 8.8.8.8
+
+ip dhcp excluded-address 192.168.150.1 192.168.150.3
+ip dhcp pool VLAN50_POOL
+network 192.168.150.0 255.255.255.240
+default-router 192.168.150.1
+dns-server 8.8.8.8
+
+interface range Gi1/0/1-3	
+switchport mode trunk
+channel-group 1 mode active
+no sh
+interface range Gi1/0/4-24	
+switchport mode trunk
+interface Port-channel 1
+sw m t
+no shut
+int gi1/0/24
+no sh
+no sw
+ip add 192.168.26.2 255.255.255.248
+
+router ospf 1
+network 192.168.26.0 0.0.0.7 area 0
+network 192.168.110.0 0.0.0.15 area 0
+network 192.168.120.0 0.0.0.15 area 0
+network 192.168.130.0 0.0.0.15 area 0
+network 192.168.140.0 0.0.0.15 area 0
+network 192.168.150.0 0.0.0.15 area 0
+
+service dhcp
+end
+conf t
+spanning-tree vlan 10 root secondary
+spanning-tree vlan 20 root secondary
+spanning-tree vlan 30 root secondary
+spanning-tree vlan 40 root secondary
+spanning-tree vlan 50 root secondary
+end
+write memory
+
+///acc sw 1
+en
+conf t
+hostname SW-1
+
+interface range GigabitEthernet 0/1-2
+switchport mode trunk
+
+vtp mode client
+vtp domain MyBankNetwork
+vtp password pass
+
+interface range FastEthernet 0/1-24
+switchport mode access
+switchport access vlan 10
+
+
+
+end
+w
+
+///acc sw 2
+en
+conf t
+hostname SW-2
+
+interface range GigabitEthernet 0/1-2
+switchport mode trunk
+
+vtp mode client
+vtp domain MyBankNetwork
+vtp password pass
+
+interface range FastEthernet 0/1-24
+switchport mode access
+switchport access vlan 20
+
+
+ 
+end
+w

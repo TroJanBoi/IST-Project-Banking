@@ -1,35 +1,43 @@
 enable
 configure terminal
 hostname ISP-Router
-interface Serial0/0
 
+interface Serial0/0
 ip address 10.1.1.2 255.255.255.252
+ip nat inside
 no sh
 exit
 
 interface Serial0/1
 ip address 10.1.1.5 255.255.255.252
+ip nat inside
 no sh
 exit
 
 interface Serial0/2
 ip address 10.1.1.9 255.255.255.252
+ip nat inside
 no sh
 exit
 
-
----- ospf ----
-router ospf 10
-network 10.1.1.0 0.0.0.3 area 0
-network 10.1.1.4 0.0.0.3 area 0
-network 10.1.1.8 0.0.0.3 area 0
-
----- bgp ----
+interface Fa0/0
+ip address 8.8.8.7 255.255.255.0
+ip nat outside
+no sh
+exit
 
 router bgp 65000
 neighbor 10.1.1.6 remote-as 65001
 neighbor 10.1.1.10 remote-as 65002
 neighbor 10.1.1.1 remote-as 65003
 exit
+
+access-list 1 permit 10.1.1.1
+access-list 1 permit 10.1.1.6
+access-list 1 permit 10.1.1.10
+
+ip nat inside source list 1 interface fa0/0 overload
+
+ip route 0.0.0.0 0.0.0.0 8.8.8.8
 
 
